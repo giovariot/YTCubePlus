@@ -85,11 +85,11 @@
 @end
 
 // DontEatMyContent
-NSString* deviceName();
-BOOL isDeviceSupported();
-void activate(); 
-void deactivate();
-void center();
+NSString* DEMC_getDeviceModelIdentifier();
+BOOL DEMC_deviceIsSupported();
+void DEMC_activate();
+void DEMC_deactivate(); 
+void DEMC_centerRenderingView();
 
 @interface YTPlayerView : UIView
 - (BOOL)zoomToFill;
@@ -107,6 +107,9 @@ void center();
 @end
 
 // OLED Darkmode
+@interface ELMView: UIView
+@end
+
 @interface ASWAppSwitcherCollectionViewCell: UIView
 @end
 

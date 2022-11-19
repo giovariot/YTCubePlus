@@ -54,6 +54,7 @@ static NSString *accessGroupID() {
     return accessGroup;
 }
 
+//
 BOOL hideHUD() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"hideHUD_enabled"];
 }
@@ -244,6 +245,7 @@ BOOL dontEatMyContent() {
 - (BOOL)enableYouthereCommandsOnIos { return NO; }
 - (BOOL)respectDeviceCaptionSetting { return NO; }
 - (BOOL)isLandscapeEngagementPanelSwipeRightToDismissEnabled { return YES; }
+- (BOOL)enableSwipeToRemoveInPlaylistWatchEp { return YES; } // Enable swipe right to remove video in Playlist. 
 %end
 
 %hook YTYouThereController
@@ -310,12 +312,9 @@ BOOL dontEatMyContent() {
 - (BOOL)shouldEnablePlayerBarOnlyOnPause { return NO; }
 %end
 
-%hook YTInlinePlayerBarContainerView
-- (void)setUserInteractionEnabled:(BOOL)enabled { %orig(YES); }
-%end
-
 %hook YTColdConfig
 - (BOOL)iosEnableVideoPlayerScrubber { return YES; }
+- (BOOL)mobileShortsTabInlined { return YES; }
 %end
 
 %hook YTHotConfig
@@ -545,6 +544,16 @@ UIColor* raisedColor = [UIColor colorWithRed:0.035 green:0.035 blue:0.035 alpha:
 }
 %end
 
+// Sub?
+%hook ELMView
+- (void)didMoveToWindow {
+    %orig;
+    if (isDarkMode()) {
+        self.subviews[0].backgroundColor = [UIColor blackColor];
+    }
+}
+%end
+
 // iSponsorBlock
 %hook SponsorBlockSettingsController
 - (void)viewDidLoad {
@@ -703,6 +712,11 @@ UIColor* raisedColor = [UIColor colorWithRed:0.035 green:0.035 blue:0.035 alpha:
     }
 }
 %end
+
+// Incompatibility with the new YT Dark theme
+%hook YTColdConfig
+- (BOOL)uiSystemsClientGlobalConfigUseDarkerPaletteBgColorForNative { return NO; }
+%end
 %end
 
 # pragma mark - OLED keyboard by @ichitaso <3 - http://gist.github.com/ichitaso/935100fd53a26f18a9060f7195a1be0e
@@ -800,15 +814,22 @@ static void replaceTab(YTIGuideResponse *response) {
 %end
 
 // DontEatMyContent - @therealFoxster: https://github.com/therealFoxster/DontEatMyContent
-double aspectRatio = 16/9;
-bool zoomedToFill = false;
+static double videoAspectRatio = 16/9;
+static bool isZoomedToFill = false, isFullscreen = false, isNewVideo = true;
 
-MLHAMSBDLSampleBufferRenderingView *renderingView;
-NSLayoutConstraint *widthConstraint, *heightConstraint, *centerXConstraint, *centerYConstraint;
+static MLHAMSBDLSampleBufferRenderingView *renderingView;
+static NSLayoutConstraint *widthConstraint, *heightConstraint, *centerXConstraint, *centerYConstraint;
 
 %group gDontEatMyContent
-%hook YTPlayerViewController
+// Retrieve video aspect ratio 
+%hook YTPlayerView
+- (void)setAspectRatio:(CGFloat)aspectRatio {
+    %orig(aspectRatio);
+    videoAspectRatio = aspectRatio;
+}
+%end
 
+%hook YTPlayerViewController
 - (void)viewDidAppear:(BOOL)animated {
     YTPlayerView *playerView = [self playerView];
     UIView *renderingViewContainer = MSHookIvar<UIView *>(playerView, "_renderingViewContainer");
@@ -820,7 +841,7 @@ NSLayoutConstraint *widthConstraint, *heightConstraint, *centerXConstraint, *cen
     heightConstraint = [renderingView.heightAnchor constraintEqualToAnchor:renderingViewContainer.safeAreaLayoutGuide.heightAnchor constant:constant];
     centerXConstraint = [renderingView.centerXAnchor constraintEqualToAnchor:renderingViewContainer.centerXAnchor];
     centerYConstraint = [renderingView.centerYAnchor constraintEqualToAnchor:renderingViewContainer.centerYAnchor];
-
+    
     // playerView.backgroundColor = [UIColor greenColor];
     // renderingViewContainer.backgroundColor = [UIColor redColor];
     // renderingView.backgroundColor = [UIColor blueColor];
@@ -828,97 +849,100 @@ NSLayoutConstraint *widthConstraint, *heightConstraint, *centerXConstraint, *cen
     YTMainAppVideoPlayerOverlayViewController *activeVideoPlayerOverlay = [self activeVideoPlayerOverlay];
 
     // Must check class since YTInlineMutedPlaybackPlayerOverlayViewController doesn't have -(BOOL)isFullscreen
-    if ([NSStringFromClass([activeVideoPlayerOverlay class]) isEqualToString:@"YTMainAppVideoPlayerOverlayViewController"] && [activeVideoPlayerOverlay isFullscreen]) {
-        activate();
+    if ([NSStringFromClass([activeVideoPlayerOverlay class]) isEqualToString:@"YTMainAppVideoPlayerOverlayViewController"] 
+    && [activeVideoPlayerOverlay isFullscreen]) {
+        if (!isZoomedToFill) DEMC_activate();
+        isFullscreen = true;
     } else {
-        center();
+        DEMC_centerRenderingView();
+        isFullscreen = false;
     }
+
     %orig(animated);
 }
-- (void)didPressToggleFullscreen {  
+- (void)didPressToggleFullscreen {
+    %orig;
     YTMainAppVideoPlayerOverlayViewController *activeVideoPlayerOverlay = [self activeVideoPlayerOverlay];
-
-    if (![activeVideoPlayerOverlay isFullscreen]) // Entering fullscreen
-        activate();
-    else // Exiting fullscreen
-        deactivate();
-
+    if (![activeVideoPlayerOverlay isFullscreen]) { // Entering full screen
+        if (!isZoomedToFill) DEMC_activate();
+    } else { // Exiting full screen
+        DEMC_deactivate();
+    }
+    
     %orig;
 }
-- (void)didSwipeToEnterFullscreen { 
-    %orig; activate(); 
+- (void)didSwipeToEnterFullscreen {
+    %orig; 
+    if (!isZoomedToFill) DEMC_activate();
 }
 - (void)didSwipeToExitFullscreen { 
-    %orig; deactivate();
-}
-// Get video aspect ratio; doesn't work for some users; see -(void)resetForVideoWithAspectRatio:(double)
-- (void)singleVideo:(id)arg1 aspectRatioDidChange:(CGFloat)arg2 {
-    aspectRatio = arg2;
-    if (aspectRatio == 0.0) { 
-        // App backgrounded
-    } else if (aspectRatio < THRESHOLD) {
-        deactivate();
-    } else {
-        activate();
-    }
-    %orig(arg1, arg2);
+    %orig; 
+    DEMC_deactivate(); 
 }
 %end
 
-%hook YTVideoZoomOverlayView
-- (void)didRecognizePinch:(UIPinchGestureRecognizer *)pinchGestureRecognizer {
-    // %log((CGFloat) [pinchGestureRecognizer scale], (CGFloat) [pinchGestureRecognizer velocity]);
-    if ([pinchGestureRecognizer velocity] <= 0.0) { // >>Zoom out<<
-        zoomedToFill = false;
-        activate();
-    } else if ([pinchGestureRecognizer velocity] > 0.0) { // <<Zoom in>>
-        zoomedToFill = true;
-        deactivate();
-    }
+%hook MLHAMSBDLSampleBufferRenderingView
+- (void)setVideo:(id)video playerConfig:(id)playerConfig {
+    %orig(video, playerConfig);
+    isNewVideo = true;
+}
+%end
 
+%hook YTVideoFreeZoomOverlayView
+- (void)didRecognizePinch:(UIPinchGestureRecognizer *)pinchGestureRecognizer {
+    // Pinched to zoom in/out
+    DEMC_deactivate();
     %orig(pinchGestureRecognizer);
 }
-- (void)flashAndHideSnapIndicator {}
-
-// https://github.com/lgariv/UniZoom/blob/master/Tweak.xm
-- (void)setSnapIndicatorVisible:(bool)arg1 {
-    %orig(NO);
-}
-%end
-
-%hook YTVideoZoomOverlayController
-// Get video aspect ratio; fallback for -(void)singleVideo:(id)aspectRatioDidChange:(CGFloat)
-- (void)resetForVideoWithAspectRatio:(double)arg1 {
-    aspectRatio = arg1;
-    %log;
-    if (aspectRatio == 0.0) {} 
-    else if (aspectRatio < THRESHOLD) {
-        deactivate();
-    } else {
-        activate();
+// Detect zoom to fill
+- (void)showLabelForSnapState:(NSInteger)snapState {
+    if (snapState == 0) { // Original
+        isZoomedToFill = false;
+        DEMC_activate();
+    } else if (snapState == 1) { // Zoomed to fill
+        isZoomedToFill = true;
+        // No need to deactivate constraints as it's already done in -(void)didRecognizePinch:(UIPinchGestureRecognizer *)
     }
-    %orig(arg1);
+    %orig(snapState);
+}
+- (void)setEnabled:(BOOL)enabled {
+    %orig(enabled);
+    if (enabled && isNewVideo && isFullscreen) { // New video played while in full screen (landscape)
+        DEMC_activate(); // Activate since new videos played in full screen aren't zoomed-to-fill for first play (i.e. the notch/Dynamic Island will cut into content when playing a new video in full screen)
+        isNewVideo = false;
+    }
 }
 %end
-%end // gDonEatMyContent
 
-// DontEatMycontent - detecting device model
+%hook YTWatchMiniBarViewController
+- (void)dismissMiniBarWithVelocity:(CGFloat)velocity gestureType:(int)gestureType {
+    %orig(velocity, gestureType);
+    isZoomedToFill = false; // Setting to false since YouTube undoes zoom-to-fill when mini bar is dismissed
+}
+- (void)dismissMiniBarWithVelocity:(CGFloat)velocity gestureType:(int)gestureType skipShouldDismissCheck:(BOOL)skipShouldDismissCheck {
+    %orig(velocity, gestureType, skipShouldDismissCheck);
+    isZoomedToFill = false;
+}
+%end
+%end// gDontEatMyContent
+
 // https://stackoverflow.com/a/11197770/19227228
-NSString* deviceName() {
+NSString* DEMC_getDeviceModelIdentifier() {
     struct utsname systemInfo;
     uname(&systemInfo);
     return [NSString stringWithCString:systemInfo.machine encoding:NSUTF8StringEncoding];
 }
 
-BOOL isDeviceSupported() {
-    NSString *identifier = deviceName();
+BOOL DEMC_deviceIsSupported() {
+    NSString *identifier = DEMC_getDeviceModelIdentifier();
     NSArray *unsupportedDevices = UNSUPPORTED_DEVICES;
-
+    
     for (NSString *device in unsupportedDevices) {
         if ([device isEqualToString:identifier]) {
             return NO;
         }
     }
+
     if ([identifier containsString:@"iPhone"]) {
         NSString *model = [identifier stringByReplacingOccurrencesOfString:@"iPhone" withString:@""];
         model = [model stringByReplacingOccurrencesOfString:@"," withString:@"."];
@@ -929,24 +953,25 @@ BOOL isDeviceSupported() {
         } else return NO;
     } else return NO;
 }
-void activate() {
-    if (aspectRatio < THRESHOLD || zoomedToFill) return;
+
+void DEMC_activate() {
+    if (videoAspectRatio < THRESHOLD) DEMC_deactivate();
     // NSLog(@"activate");
-    center();
+    DEMC_centerRenderingView();
     renderingView.translatesAutoresizingMaskIntoConstraints = NO;
     widthConstraint.active = YES;
     heightConstraint.active = YES;
 }
 
-void deactivate() {
+void DEMC_deactivate() {
     // NSLog(@"deactivate");
-    center();
+    DEMC_centerRenderingView();
     renderingView.translatesAutoresizingMaskIntoConstraints = YES;
     widthConstraint.active = NO;
     heightConstraint.active = NO;
 }
 
-void center() {
+void DEMC_centerRenderingView() {
     centerXConstraint.active = YES;
     centerYConstraint.active = YES;
 }
@@ -1044,7 +1069,7 @@ void center() {
     if (replacePreviousAndNextButton()) {
        %init(gReplacePreviousAndNextButton);
     }
-	if (dontEatMyContent() && isDeviceSupported()) {
+    if (dontEatMyContent() && DEMC_deviceIsSupported()) {
        %init(gDontEatMyContent);
 	}
     if (!fixGoogleSignIn()) {
