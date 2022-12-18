@@ -22,15 +22,16 @@
 
 # Table of Contents
 
-* [Credits](#credits)
-* [Features](#features)
-* [Known issues](#known-issues)
-* [Download (IPA)](#download-ipa)
-* [Support the developers!](#support-the-developers)
-* [Building (optional)](#building-optional)
+- [Credits](#credits)
+- [Features](#features)
+- [Known issues](#known-issues)
+- [Download (IPA)](#download-ipa)
+- [Support the developers!](#support-the-developers)
+- [Building (optional)](#building-optional)
 
 # Credits
-- Special thanks to all the developers who have contributed to CercubePlus! 
+
+- Special thanks to all the developers who have contributed to CercubePlus!
 
 <table id='credit'>
 <tr>
@@ -181,6 +182,7 @@
 14. **YTABConfig**: allow user to control over YouTube A/B testing flags.
 
 any many more...
+
 </details>
 
 # Known issues
@@ -189,11 +191,11 @@ any many more...
 
 2. **YTUHD**: [Stuttering on 4K videos](https://github.com/qnblackcat/uYouPlus/issues/6).
 
-3. **YouPiP** (iOS 14.0 - 14.4.2): due to Apple's fault, you may encounter the *speedup-bug* as described [here](https://drive.google.com/file/d/1NKdv1fr_KRWgD8nhkMDfG2eLBnbdeVtX/view?usp=sharing). The bug also happens when you try to play multi-sources of sound at the same time. Enable **LegacyPiP** is a workaround. Keep in mind that LegacyPiP also removes UHD quality and breaks YouTube Autoplay next. Use it at your own risk!
+3. **YouPiP** (iOS 14.0 - 14.4.2): due to Apple's fault, you may encounter the _speedup-bug_ as described [here](https://drive.google.com/file/d/1NKdv1fr_KRWgD8nhkMDfG2eLBnbdeVtX/view?usp=sharing). The bug also happens when you try to play multi-sources of sound at the same time. Enable **LegacyPiP** is a workaround. Keep in mind that LegacyPiP also removes UHD quality and breaks YouTube Autoplay next. Use it at your own risk!
 
-4. **Not a bug**: 
+4. **Not a bug**:
 
-- The app won't be able to receive push notifications if you use a free developer account to sideload it. 
+- The app won't be able to receive push notifications if you use a free developer account to sideload it.
 
 - It's impossible to fix deep-link (a.k.a Open in the YouTube app). However, you can use this [Shortcuts](https://shortcutsgallery.com/shortcuts/open-in-youtube/) as a workaround (tested on iOS 14). **Credit:** RandomAccessMemories#5025
 
@@ -201,47 +203,49 @@ any many more...
 
 - **CercubePlus** (or you can call it Cercube+) requires iOS & iPadOS 14.0 and later. The latest version of **CercubePlus** can be found in the [Release tab](https://github.com/qnblackcat/CercubePlus/releases).
 
-- For AltStore user: [Open in AltStore (v17.43.1-5.3.11)](https://tinyurl.com/357hrwsh) - It will take a while to install because AltStore needs to download the IPA first.
+- For AltStore user: [Open in AltStore (v17.49.6-5.3.12)](https://tinyurl.com/357hrwsh) - It will take a while to install because AltStore needs to download the IPA first.
 
 - Version info: _(Nov 06)_
 
 <details>
   <summary>Expand!</summary>
 
-| **Tweaks/App** | **Developer** | **Version** | **Open source** |
-| - | - | :-: | :-:  |
-| **YouTube** | Google Inc | 17.43.1 | ✖︎ |
-| **Cercube** | [Majd Alfhaily](https://twitter.com/freemanrepo) | 5.3.11 | ✖︎ |
-| **Open in YouTube** | [CokePokes](https://github.com/CokePokes/) | 1.2 | ✖︎ |
-| **YTNoShorts** | [MiRO92](https://twitter.com/miro92) | 1.0.2 | [✔︎](https://github.com/MiRO92/YTNoShorts) |
-| **iSponsorBlock** | [Galactic-Dev](https://github.com/Galactic-Dev) | 1.0-15 | [✔︎](https://github.com/Galactic-Dev/iSponsorBlock) |
-| **BigYTMiniPlayer** | [Galactic-Dev](https://github.com/Galactic-Dev) | 1.0-1 | [✔︎](https://github.com/Galactic-Dev/BigYTMiniPlayer) |
-| **YTNoHoverCards** | [level3tjg](https://twitter.com/level3tjg) | 0.0.3 | [✔︎](https://github.com/level3tjg/YTNoHoverCards) |
-| **YTMiniplayerEnabler** | [level3tjg](https://twitter.com/level3tjg) | 0.0.2 | [✔︎](https://github.com/level3tjg/YTMiniplayerEnabler) |
-| **DontEatMyContent** | [therealFoxster](https://github.com/therealFoxster) | 1.0.3 | [✔︎](https://github.com/therealFoxster/DontEatMyContent) |
-| **YTUHD** | [PoomSmart](https://twitter.com/poomsmart) | 1.3.4 | [✔︎](https://github.com/PoomSmart/YTUHD) |
-| **YouPiP** | [PoomSmart](https://twitter.com/poomsmart) | 1.7.15 | [✔︎](https://github.com/PoomSmart/YouPiP) |
-| **YTABConfig** | [PoomSmart](https://twitter.com/poomsmart) | 1.4.4 | [✔︎](https://github.com/PoomSmart/YTABConfig) |
-| **IAmYouTube** | [PoomSmart](https://twitter.com/poomsmart) | 1.2.0 | [✔︎](https://github.com/PoomSmart/IAmYouTube) |
-| **YTReExplore** | [PoomSmart](https://twitter.com/poomsmart) | 1.0.2 | [✔︎](https://github.com/PoomSmart/YTReExplore) |
-| **NoYTPremium** | [PoomSmart](https://twitter.com/poomsmart) | 1.0.4 | [✔︎](https://github.com/PoomSmart/NoYTPremium) |
-| **YTABGoodies** | [PoomSmart](https://twitter.com/poomsmart) | 1.0 | [✔︎](https://poomsmart.github.io/repo/depictions/ytabgoodies.html) |
-| **YTNoPaidPromo** | [PoomSmart](https://twitter.com/poomsmart) | 1.0.0 | [✔︎](https://github.com/PoomSmart/YTNoPaidPromo) |
-| **YTAutoFullScreen** | [PoomSmart](https://twitter.com/poomsmart) | 1.0.3 | [✔︎](https://github.com/PoomSmart/YTAutoFullScreen) |
-| **YTShortsProgress** | [PoomSmart](https://twitter.com/poomsmart) | 1.0.2 | [✔︎](https://github.com/PoomSmart/YTShortsProgress) |
-| **Return YouTube Dislike** | [PoomSmart](https://twitter.com/poomsmart) | 1.7.3 | [✔︎](https://github.com/PoomSmart/Return-YouTube-Dislikes) |
+| **Tweaks/App**             | **Developer**                                       | **Version** |                          **Open source**                           |
+| -------------------------- | --------------------------------------------------- | :---------: | :----------------------------------------------------------------: |
+| **YouTube**                | Google Inc                                          |   17.49.6   |                                 ✖︎                                 |
+| **Cercube**                | [Majd Alfhaily](https://twitter.com/freemanrepo)    |   5.3.12    |                                 ✖︎                                 |
+| **Open in YouTube**        | [CokePokes](https://github.com/CokePokes/)          |     1.2     |                                 ✖︎                                 |
+| **YTNoShorts**             | [MiRO92](https://twitter.com/miro92)                |    1.0.2    |             [✔︎](https://github.com/MiRO92/YTNoShorts)             |
+| **iSponsorBlock**          | [Galactic-Dev](https://github.com/Galactic-Dev)     |   1.0-15    |        [✔︎](https://github.com/Galactic-Dev/iSponsorBlock)         |
+| **BigYTMiniPlayer**        | [Galactic-Dev](https://github.com/Galactic-Dev)     |    1.0-1    |       [✔︎](https://github.com/Galactic-Dev/BigYTMiniPlayer)        |
+| **YTNoHoverCards**         | [level3tjg](https://twitter.com/level3tjg)          |    0.0.3    |         [✔︎](https://github.com/level3tjg/YTNoHoverCards)          |
+| **YTMiniplayerEnabler**    | [level3tjg](https://twitter.com/level3tjg)          |    0.0.2    |       [✔︎](https://github.com/level3tjg/YTMiniplayerEnabler)       |
+| **DontEatMyContent**       | [therealFoxster](https://github.com/therealFoxster) |    1.0.3    |      [✔︎](https://github.com/therealFoxster/DontEatMyContent)      |
+| **YTUHD**                  | [PoomSmart](https://twitter.com/poomsmart)          |    1.3.4    |              [✔︎](https://github.com/PoomSmart/YTUHD)              |
+| **YouPiP**                 | [PoomSmart](https://twitter.com/poomsmart)          |   1.7.15    |             [✔︎](https://github.com/PoomSmart/YouPiP)              |
+| **YTABConfig**             | [PoomSmart](https://twitter.com/poomsmart)          |    1.4.4    |           [✔︎](https://github.com/PoomSmart/YTABConfig)            |
+| **IAmYouTube**             | [PoomSmart](https://twitter.com/poomsmart)          |    1.2.0    |           [✔︎](https://github.com/PoomSmart/IAmYouTube)            |
+| **YTReExplore**            | [PoomSmart](https://twitter.com/poomsmart)          |    1.0.2    |           [✔︎](https://github.com/PoomSmart/YTReExplore)           |
+| **NoYTPremium**            | [PoomSmart](https://twitter.com/poomsmart)          |    1.0.4    |           [✔︎](https://github.com/PoomSmart/NoYTPremium)           |
+| **YTABGoodies**            | [PoomSmart](https://twitter.com/poomsmart)          |     1.0     | [✔︎](https://poomsmart.github.io/repo/depictions/ytabgoodies.html) |
+| **YTNoPaidPromo**          | [PoomSmart](https://twitter.com/poomsmart)          |    1.0.0    |          [✔︎](https://github.com/PoomSmart/YTNoPaidPromo)          |
+| **YTAutoFullScreen**       | [PoomSmart](https://twitter.com/poomsmart)          |    1.0.3    |        [✔︎](https://github.com/PoomSmart/YTAutoFullScreen)         |
+| **YTShortsProgress**       | [PoomSmart](https://twitter.com/poomsmart)          |    1.0.2    |        [✔︎](https://github.com/PoomSmart/YTShortsProgress)         |
+| **Return YouTube Dislike** | [PoomSmart](https://twitter.com/poomsmart)          |    1.7.3    |     [✔︎](https://github.com/PoomSmart/Return-YouTube-Dislikes)     |
 
 </details>
 
 # Support the developers
+
 - [**MiRO92**](https://twitter.com/miro92): https://github.com/MiRO92/uYou-for-YouTube#support
 - [**Poomsmart**](https://twitter.com/poomsmart): https://poomsmart.github.io
 - [**level3tjg**](https://twitter.com/level3tjg): https://ko-fi.com/level3tjg
 - [**BandarHL**](https://twitter.com/bandarhl): https://www.paypal.com/paypalme/BandarHL
 - [**julioverne**](https://twitter.com/ijulioverne): https://www.patreon.com/julioverne
-- [**Galactic-dev**](https://twitter.com/dev_galactic):   
-  - Paypal: https://www.paypal.com/paypalme/DBrett684 
+- [**Galactic-dev**](https://twitter.com/dev_galactic):
+  - Paypal: https://www.paypal.com/paypalme/DBrett684
   - Venmo: https://venmo.com/u/DavidBrett
 
 # Building (optional)
+
 See [Building - Wiki](https://github.com/qnblackcat/CercubePlus/wiki/Building)
