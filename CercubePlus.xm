@@ -17,6 +17,8 @@
 #import "Tweaks/YouTubeHeader/ASCollectionView.h"
 #import "Tweaks/YouTubeHeader/YTPlayerOverlay.h"
 #import "Tweaks/YouTubeHeader/YTPlayerOverlayProvider.h"
+#import "Tweaks/YouTubeHeader/YTReelPlayerViewController.h"
+#import "Tweaks/YouTubeHeader/YTIElementRenderer.h"
 
 NSBundle *CercubePlusBundle() {
     static NSBundle *bundle = nil;
@@ -299,6 +301,29 @@ BOOL dontEatMyContent() {
 }
 %end
 
+// Hide search ads by @PoomSmart - https://github.com/PoomSmart/YouTube-X
+BOOL didLateHook = NO;
+
+%group LateHook
+%hook YTIElementRenderer
+- (NSData *)elementData {
+    if (self.hasCompatibilityOptions && self.compatibilityOptions.hasAdLoggingData)
+        return nil;
+    return %orig;
+}
+%end
+%end
+
+%hook YTSectionListViewController
+- (void)loadWithModel:(id)model {
+    if (!didLateHook) {
+        %init(LateHook);
+        didLateHook = YES;
+    }
+    %orig;
+}
+%end
+
 // YTShortsProgress - @PoomSmart - https://github.com/PoomSmart/YTShortsProgress
 %hook YTReelPlayerViewController
 - (BOOL)shouldEnablePlayerBar { return YES; }
@@ -549,7 +574,7 @@ UIColor* raisedColor = [UIColor colorWithRed:0.035 green:0.035 blue:0.035 alpha:
 - (void)didMoveToWindow {
     %orig;
     if (isDarkMode()) {
-        self.subviews[0].backgroundColor = [UIColor blackColor];
+        self.subviews[0].backgroundColor = [UIColor clearColor];
     }
 }
 %end
@@ -656,6 +681,16 @@ UIColor* raisedColor = [UIColor colorWithRed:0.035 green:0.035 blue:0.035 alpha:
 %end
 
 %hook YTEmojiTextView
+- (void)setBackgroundColor:(UIColor *)color {
+    if (isDarkMode()) {
+        return %orig([UIColor blackColor]);
+    }
+        return %orig;
+}
+%end
+
+//
+%hook YTBackstageCreateRepostDetailView
 - (void)setBackgroundColor:(UIColor *)color {
     if (isDarkMode()) {
         return %orig([UIColor blackColor]);
