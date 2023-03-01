@@ -73,10 +73,10 @@ jobs:
       - name: Setup Theos Parallel Building
         run: |
           echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH
-          echo "$PATH"
-
+          
       - name: Download Dylibs
         run: |
+          echo "$PATH"
           curl "https://raw.githubusercontent.com/Muirey03/RemoteLog/master/RemoteLog.h" --output "$THEOS/include/RemoteLog.h"
           curl "https://apt.alfhaily.me/files/me.alfhaily.cercube_${{ env.CERCUBE_VERSION }}_iphoneos-arm.deb" --output "./main/Tweaks/Cercube/me.alfhaily.cercube_${{ env.CERCUBE_VERSION }}_iphoneos-arm.deb"
           wget "$YOUTUBE_URL" --no-verbose -O ./main/YouTube.ipa
