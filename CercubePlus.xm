@@ -426,52 +426,14 @@ BOOL didLateHook = NO;
         return YT_NAME;
     return %orig;
 }
-%end
-
-// Fix "Google couldn't confirm this attempt to sign in is safe. If you think this is a mistake, you can close and try again to sign in" - qnblackcat/uYouPlus#420
-// Thanks to @AhmedBafkir and @kkirby - https://github.com/qnblackcat/uYouPlus/discussions/447#discussioncomment-3672881
-%group gFixGoogleSignIn
-%hook SSORPCService
-+ (id)URLFromURL:(id)arg1 withAdditionalFragmentParameters:(NSDictionary *)arg2 {
-    NSURL *orig = %orig;
-    NSURLComponents *urlComponents = [[NSURLComponents alloc] initWithURL:orig resolvingAgainstBaseURL:NO];
-    NSMutableArray *newQueryItems = [urlComponents.queryItems mutableCopy];
-    for (NSURLQueryItem *queryItem in urlComponents.queryItems) {
-        if ([queryItem.name isEqualToString:@"system_version"]
-         || [queryItem.name isEqualToString:@"app_version"]
-         || [queryItem.name isEqualToString:@"kdlc"]
-         || [queryItem.name isEqualToString:@"kss"]
-         || [queryItem.name isEqualToString:@"lib_ver"]
-         || [queryItem.name isEqualToString:@"device_model"]) {
-            [newQueryItems removeObject:queryItem];
-        }
-    }
-    urlComponents.queryItems = [newQueryItems copy];
-    return urlComponents.URL;
+// Fix Google Sign in by @PoomSmart and @level3tjg (qnblackcat/uYouPlus#684)
+- (NSDictionary *)infoDictionary {
+    NSMutableDictionary *info = %orig.mutableCopy;
+    NSString *altBundleIdentifier = info[@"ALTBundleIdentifier"];
+    if (altBundleIdentifier) info[@"CFBundleIdentifier"] = altBundleIdentifier;
+    return info;
 }
 %end
-%end
-
-// Fix "You can't sign in to this app because Google can't confirm that it's safe" warning when signing in. by julioverne & PoomSmart
-// https://gist.github.com/PoomSmart/ef5b172fd4c5371764e027bea2613f93
-// https://github.com/qnblackcat/uYouPlus/pull/398
-/* 
-%group gDevice_challenge_request_hack
-%hook SSOService
-+ (id)fetcherWithRequest:(NSMutableURLRequest *)request configuration:(id)configuration {
-    if ([request isKindOfClass:[NSMutableURLRequest class]] && request.HTTPBody) {
-        NSError *error = nil;
-        NSMutableDictionary *body = [NSJSONSerialization JSONObjectWithData:request.HTTPBody options:NSJSONReadingMutableContainers error:&error];
-        if (!error && [body isKindOfClass:[NSMutableDictionary class]]) {
-            [body removeObjectForKey:@"device_challenge_request"];
-            request.HTTPBody = [NSJSONSerialization dataWithJSONObject:body options:kNilOptions error:&error];
-        }
-    }
-    return %orig;
-}
-%end
-%end
-*/ 
 
 // Fix login for YouTube 17.33.2 and higher - @BandarHL
 // https://gist.github.com/BandarHL/492d50de46875f9ac7a056aad084ac10
