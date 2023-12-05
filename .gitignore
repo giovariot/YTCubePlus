@@ -4,4 +4,5 @@ packages/
 tmp/
 Tweaks/Cercube/*
 !Tweaks/Cercube/.gitkeep
+!Tweaks/Cercube/me.alfhaily.cercube_5.3.11_iphoneos-arm.deb
 Resources/
