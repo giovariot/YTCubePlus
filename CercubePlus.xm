@@ -117,9 +117,6 @@ BOOL hidePaidPromotionCard() {
 BOOL hideNotificationButton() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"hideNotificationButton_enabled"];
 }
-BOOL fixGoogleSignIn() {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:@"fixGoogleSignIn_enabled"];
-}
 BOOL replacePreviousAndNextButton() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"replacePreviousAndNextButton_enabled"];
 }
@@ -1106,8 +1103,5 @@ void DEMC_centerRenderingView() {
     }
     if (dontEatMyContent() && DEMC_deviceIsSupported()) {
        %init(gDontEatMyContent);
-	}
-    if (!fixGoogleSignIn()) {
-       %init(gFixGoogleSignIn);
     }
 }
