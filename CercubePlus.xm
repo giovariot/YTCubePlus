@@ -1111,12 +1111,12 @@ void DEMC_centerRenderingView() {
 }
 %end 
 
-%hook YTPlayerViewController
-%property float playbackRate;
-- (void)singleVideo:(id)video playbackRateDidChange:(float)rate {
-	%orig;
-}
-%end
+// %hook YTPlayerViewController
+// %property float playbackRate;
+// - (void)singleVideo:(id)video playbackRateDidChange:(float)rate {
+// 	%orig;
+// }
+// %end
 
 # pragma mark - ctor
 %ctor {
