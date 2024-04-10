@@ -1,11 +1,26 @@
-TARGET = iphone:clang:latest:14.0
+export TARGET = iphone:clang:latest:14.0
+export ARCHS = arm64
+
+export libcolorpicker_ARCHS = arm64
+export libFLEX_ARCHS = arm64
+export Alderis_XCODEOPTS = LD_DYLIB_INSTALL_NAME=@rpath/Alderis.framework/Alderis
+export Alderis_XCODEFLAGS = DYLIB_INSTALL_NAME_BASE=/Library/Frameworks BUILD_LIBRARY_FOR_DISTRIBUTION=YES ARCHS="$(ARCHS)"
+export libcolorpicker_LDFLAGS = -F$(TARGET_PRIVATE_FRAMEWORK_PATH) -install_name @rpath/libcolorpicker.dylib
+export ADDITIONAL_CFLAGS = -I$(THEOS_PROJECT_DIR)/Tweaks/RemoteLog -I$(THEOS_PROJECT_DIR)/Tweaks
+
 CercubePlus_USE_FLEX = 0
 CercubePlus_USE_FISHHOOK = 0
-ARCHS = arm64
 MODULES = jailed
 FINALPACKAGE = 1
 CODESIGN_IPA = 0
-PACKAGE_VERSION = 18.48.3-5.3.11
+
+ifndef YOUTUBE_VERSION
+YOUTUBE_VERSION = 18.48.3
+endif
+ifndef CERCUBE_VERSION
+CERCUBE_VERSION = 5.3.11
+endif
+PACKAGE_VERSION = $(YOUTUBE_VERSION)-$(CERCUBE_VERSION)
 
 TWEAK_NAME = CercubePlus
 DISPLAY_NAME = YouTube
