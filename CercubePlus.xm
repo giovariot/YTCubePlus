@@ -20,6 +20,10 @@
 #import "Tweaks/YouTubeHeader/YTReelPlayerViewController.h"
 #import "Tweaks/YouTubeHeader/YTIElementRenderer.h"
 
+static BOOL IsEnabled(NSString *key) {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:key];
+}
+
 NSBundle *CercubePlusBundle() {
     static NSBundle *bundle = nil;
     static dispatch_once_t onceToken;
