@@ -843,13 +843,9 @@ static void replaceTab(YTIGuideResponse *response) {
 
 // Mini bar dismiss
 %hook YTWatchMiniBarViewController
-- (void)dismissMiniBarWithVelocity:(CGFloat)velocity gestureType:(int)gestureType {
-    %orig(velocity, gestureType);
-    zoomedToFill = false; // Setting to false since YouTube undoes zoom-to-fill when mini bar is dismissed
-}
-- (void)dismissMiniBarWithVelocity:(CGFloat)velocity gestureType:(int)gestureType skipShouldDismissCheck:(BOOL)skipShouldDismissCheck {
-    %orig(velocity, gestureType, skipShouldDismissCheck);
-    zoomedToFill = false;
+- (void)updateMiniBarPlayerStateFromRenderer {
+    if (IsEnabled(@"ytMiniPlayer_enabled")) {}
+    else { return %orig; }
 }
 %end
 
