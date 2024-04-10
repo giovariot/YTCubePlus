@@ -1,14 +1,19 @@
-# Original idea by @ISnackable. Many thanks to him for handling the most hardest parts!
+# Original idea by @ISnackable. Thanks to him for handling the hardest parts!
 # https://github.com/ISnackable/YTCubePlus/blob/main/.github/workflows/Build.yml
 
-name: Build and Release CercubePlus
+name: Build and Release YTCubePlus
 
 on:
   workflow_dispatch:
     inputs:
+      sdk_version:
+        description: "iOS SDK version to be used during build"
+        default: "16.4"
+        required: true
+        type: string
       cercube_version:
         description: "The version of Cercube"
-        default: "5.3.11"
+        default: "3.0.3"
         required: true
         type: string
       decrypted_youtube_url:
@@ -16,14 +21,14 @@ on:
         default: ""
         required: true
         type: string
-      youtube_version:
-        description: "The version of YouTube"
-        default: ""
+      bundle_id:
+        description: "Modify the bundle ID. Not recommended"
+        default: "com.google.ios.youtube"
         required: true
         type: string
-      sdk_version:
-        description: "iOS SDK version to be used during build"
-        default: "16.2"
+      app_name:
+        description: "Modify the name of the app on the Home Screen. Not recommended"
+        default: "YouTube"
         required: true
         type: string
       create_release:
@@ -31,49 +36,58 @@ on:
         default: true
         required: false
         type: boolean
-
+      upload_artifact:
+        description: "Upload Artifact"
+        default: true
+        required: false
+        type: boolean
+  
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Build CercubePlus
-    runs-on: macos-12
+    name: Build YTCubePlus
+    runs-on: macos-latest
     permissions:
       contents: write
 
     steps:
       - name: Checkout Main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           path: main
           submodules: recursive
 
       - name: Install Dependencies
-        run: brew install ldid dpkg
+        run: brew install ldid dpkg make
+
+      - name: Set PATH environment variable
+        run: echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH 
 
       - name: Setup Theos
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           repository: theos/theos
-          ref: 9941262c450c0abac524574cb96b9a4cdf5e50f4
+          ref: master
           path: theos
           submodules: recursive
-
-      - name: Caching
+      
+      - name: SDK Caching
         id: SDK
-        uses: actions/cache@v3.3.2
+        uses: actions/cache@v4.0.2
         env:
           cache-name: iOS-${{ inputs.sdk_version }}-SDK
         with:
           path: theos/sdks/
           key: ${{ env.cache-name }}
+          restore-keys: ${{ env.cache-name }}
 
       - name: Download iOS SDK
         if: steps.SDK.outputs.cache-hit != 'true'
         run: |
-          git clone -n --depth=1 --filter=tree:0 https://github.com/arichorn/sdks/
+          git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/arichornlover/sdks/
           cd sdks
           git sparse-checkout set --no-cone iPhoneOS${{ inputs.sdk_version }}.sdk
           git checkout
@@ -82,7 +96,7 @@ jobs:
           THEOS: ${{ github.workspace }}/theos
 
       - name: Setup Theos Jailed
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           repository: qnblackcat/theos-jailed
           ref: master
@@ -95,55 +109,58 @@ jobs:
         env:
           THEOS: ${{ github.workspace }}/theos
 
-      - name: Download Cercube & Prepare YouTube iPA
+      - name: Prepare YouTube iPA
+        id: prepare_youtube
         run: |
-          curl "https://raw.githubusercontent.com/Muirey03/RemoteLog/master/RemoteLog.h" --output "$THEOS/include/RemoteLog.h"
-          # curl -L "https://apt.alfhaily.me/files/me.alfhaily.cercube_${{ env.CERCUBE_VERSION }}_iphoneos-arm.deb" --output "main/Tweaks/Cercube/me.alfhaily.cercube_${{ env.CERCUBE_VERSION }}_iphoneos-arm.deb"
           wget "$YOUTUBE_URL" --no-verbose -O main/YouTube.ipa
-          dpkg-deb -x "main/Tweaks/Cercube/me.alfhaily.cercube_${{ env.CERCUBE_VERSION }}_iphoneos-arm.deb" main/Tweaks/Cercube/
-          unzip -q main/YouTube.ipa -d main/tmp
-          rm -rf main/tmp/Payload/YouTube.app/_CodeSignature/CodeResources
-          rm -rf main/tmp/Payload/YouTube.app/PlugIns/*
-          cp -R main/Extensions/*.appex main/tmp/Payload/YouTube.app/PlugIns
+          cd ${{ github.workspace }}/main
+          mv YouTube.ipa YouTube.zip
+          unzip -q YouTube.zip
+          youtube_version=$(defaults read "$(pwd)/Payload/YouTube.app/Info" CFBundleVersion)
+          echo "==> YouTube v$youtube_version downloaded!"
+          sed -i '' "17s#.*#YOUTUBE_VERSION = ${youtube_version}#g" Makefile
+          echo "youtube_version=${youtube_version}" >> $GITHUB_OUTPUT
 
         env:
           THEOS: ${{ github.workspace }}/theos
-          CERCUBE_VERSION: ${{ inputs.cercube_version }}
           YOUTUBE_URL: ${{ inputs.decrypted_youtube_url }}
 
-      - name: Fix Compiling & Build Package
+      - name: Fix compiling & Build Package
         id: build_package
         run: |
-          (echo 'THEOS_IGNORE_PARALLEL_BUILDING_NOTICE = yes' >> ~/.theosrc)
           cd ${{ github.workspace }}/main
-          (cd ${{ github.workspace }}/main/Tweaks/YouPiP && sed -i '' "13s/$/ AVFoundation UIKit/" Makefile)
-          (cd ${{ github.workspace }}/main/Tweaks/YTABConfig && sed -i '' "12s#.*#YTABConfig_FRAMEWORKS = UIKit#g" Makefile)
-          make package FINALPACKAGE=1
-          (mv "packages/$(ls -t packages | head -n1)" "packages/CercubePlus_${{ env.YOUTUBE_VERSION }}_${{ env.CERCUBE_VERSION }}.ipa")
+          sed -i '' "27s#.*#BUNDLE_ID = ${{ env.BUNDLE_ID }}#g" Makefile                          # Modify the bundle ID
+          sed -i '' "26s#.*#DISPLAY_NAME = ${{ env.APP_NAME }}#g" Makefile                        # Modify the app name
+          sed -i '' "1s#.*#export TARGET = iphone:clang:${{ inputs.sdk_version }}:14.0#g" Makefile # Modify the SDK version
+          make package THEOS_PACKAGE_SCHEME=rootless IPA=Payload/YouTube.app FINALPACKAGE=1
           echo "package=$(ls -t packages | head -n1)" >>$GITHUB_OUTPUT
           echo -e "==> \033[1mSHASUM256: $(shasum -a 256 packages/*.ipa | cut -f1 -d' ')\033[0m"
+          echo -e "==> \033[1mBundle ID: ${{ env.BUNDLE_ID }}\033[0m"
+
         env:
           THEOS: ${{ github.workspace }}/theos
           CERCUBE_VERSION: ${{ inputs.cercube_version }}
-          YOUTUBE_VERSION: ${{ inputs.youtube_version }}
+          BUNDLE_ID: ${{ inputs.bundle_id }}
+          APP_NAME: ${{ inputs.app_name }}
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        if: ${{ inputs.upload_artifact }}
+        uses: actions/upload-artifact@v4.3.1
         env:
           CERCUBE_VERSION: ${{ inputs.cercube_version }}
-          YOUTUBE_VERSION: ${{ inputs.youtube_version }}
+          YOUTUBE_VERSION: ${{ steps.prepare_youtube.outputs.youtube_version }}
         with:
-          name: CercubePlus_${{ env.YOUTUBE_VERSION }}_${{ env.CERCUBE_VERSION }}
+          name: YTCubePlus_${{ env.YOUTUBE_VERSION }}_${{ env.cercube_VERSION }}
           path: ${{ github.workspace }}/main/packages/${{ steps.build_package.outputs.package }}
           if-no-files-found: error
 
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.0.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CERCUBE_VERSION: ${{ inputs.CERCUBE_VERSION }}
-          YOUTUBE_VERSION: ${{ inputs.youtube_version }}
+          CERCUBE_VERSION: ${{ inputs.cercube_version }}
+          YOUTUBE_VERSION: ${{ steps.prepare_youtube.outputs.youtube_version }}
           DRAFT: ${{ inputs.create_release }}
         with:
           tag_name: v${{ env.YOUTUBE_VERSION }}-${{ env.CERCUBE_VERSION }}-(${{ github.run_number }})
