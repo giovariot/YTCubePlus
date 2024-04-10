@@ -839,16 +839,6 @@ static void replaceTab(YTIGuideResponse *response) {
 %end
 %end
 
-
-
-// Mini bar dismiss
-%hook YTWatchMiniBarViewController
-- (void)updateMiniBarPlayerStateFromRenderer {
-    if (IsEnabled(@"ytMiniPlayer_enabled")) {}
-    else { return %orig; }
-}
-%end
-
 // YTNoShorts: https://github.com/MiRO92/YTNoShorts
 %hook YTAsyncCollectionView
 - (id)cellForItemAtIndexPath:(NSIndexPath *)indexPath {
