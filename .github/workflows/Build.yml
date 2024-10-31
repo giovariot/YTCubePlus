@@ -36,7 +36,7 @@ jobs:
           submodules: recursive
 
       - name: Install Dependencies
-        run: brew install ldid dpkg make
+        run: brew install ldid dpkg make swiftlint
 
       - name: Setup Theos
         uses: actions/checkout@v3
